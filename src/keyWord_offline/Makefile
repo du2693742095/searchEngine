@@ -1,9 +1,9 @@
 SRCS=$(wildcard *.cc)
 OBJS:=$(patsubst %.cc, %.o, $(SRCS))
-LIB:= -pthread
+LIB:= 
 PATHS:= -I /home/lemon/Git/searchEngine/include/
 CC:= g++
-BIN:= /home/lemon/Git/searchEngine/bin/server
+BIN:= /home/lemon/Git/searchEngine/bin/keyWord_offline
 
 $(BIN):$(OBJS)
 	$(CC) $^ -o $@ $(LIB) $(PATHS)
