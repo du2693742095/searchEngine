@@ -15,9 +15,11 @@
 class Configuration
 {
 public:
-    Configuration(const std::string & filePath);
-    Configuration(const std::string && filePath);
-    ~Configuration(){}
+    static Configuration * getInstance();
+    static Configuration * getInstance(const std::string & filePath);
+    static Configuration * getInstance(const std::string && filePath);
+    static void destroyIns();
+
     std::map<std::string, std::string> & getConfigMap();
     std::set<std::string> & getStopWordList_EN();
     std::set<std::string> & getStopWordList_ZH();
@@ -25,13 +27,23 @@ public:
     void createStopWord_ZH(); //只在离线版词频中用
 
 private:
+    Configuration(const std::string & filePath);
+    Configuration(const std::string && filePath);
+    ~Configuration(){}
+
+    Configuration(const Configuration &) = delete ;
+    Configuration & operator=(const Configuration &) = delete ;
+
     void createConf(); //参数的个数就是map的大小
 
 private:
+    static Configuration *_pInstance;
     std::string _filePath;
     std::map<std::string, std::string> _configMap;
     std::set<std::string> _stopWordList_EN;
     std::set<std::string> _stopWordList_ZH;
 };
+
+Configuration *Configuration::_pInstance = nullptr;
 
 #endif

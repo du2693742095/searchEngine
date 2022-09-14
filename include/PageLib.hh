@@ -21,18 +21,21 @@ using std::vector;
 using std::pair;
 
 /* 用来生成网页库和位置偏移库 */
+/* 如果没有标题，则抽取第一行内容作为标题 
+ * 将标题也放入内容中，一起变成一篇文章 */
 class PageLib
 {
 public:
-    PageLib(Configuration &conf);
+    PageLib(Configuration *conf);
     void create();
     void store();
+    vector<string> & getFiles();
 
 private:
     void readFile(const string &XMLFile, size_t &totalSize);
 
 private:
-    Configuration & _conf;
+    Configuration * _conf;
     DirScanner _dir;//存储了文件名
     vector<string> _files;//存储所有的网页库
 

@@ -23,10 +23,10 @@ void errorCheck(int flag, int really, const char * msg)
     }
 }
 
-PageLib::PageLib(Configuration &conf)
+PageLib::PageLib(Configuration *conf)
     : _conf(conf)
 {
-    auto p = _conf.getConfigMap().find("path_XMLLib");
+    auto p = _conf->getConfigMap().find("path_XMLLib");
     _dir(p->second);
     _files.reserve(1024);
 }
@@ -45,8 +45,8 @@ void PageLib::create()
 void PageLib::store()
 {
     std::cout << "存储！" << std::endl;
-    string ripePagePath = _conf.getConfigMap().find("path_newRipePage")->second;
-    string offsetPagePath = _conf.getConfigMap().find("path_newOffset")->second;
+    string ripePagePath = _conf->getConfigMap().find("path_newRipePage")->second;
+    string offsetPagePath = _conf->getConfigMap().find("path_newOffset")->second;
 
     std::ofstream ripePage(ripePagePath);
     errorCheck(ripePage.is_open(), true, "open ripePage in PageLib");
@@ -100,10 +100,22 @@ void PageLib::readFile(const string & xmlFile, size_t & totalSize)
         const char *pTitle = nullptr;
         const char *pLink = nullptr;
         const char *pContent = nullptr;
-        if(elTitle) pTitle = elTitle->GetText();
         if(elLink) pLink = elLink->GetText();
+        //文章内容可能是content或者description的其中一种
         if(elContent) pContent = elContent->GetText();
         if(elDiscreption) pContent = elDiscreption->GetText();
+        //如果没有标题，那就抽取第一行当作标题
+        char titleTemp[256] = {0};
+        if(elTitle){ 
+            pTitle = elTitle->GetText();
+        }
+        else{
+            //抽取第一行
+            int idx = 0;
+            while(pContent && pContent[idx++] != '\n');
+            strncpy(titleTemp, pContent, idx);
+            pTitle = titleTemp;
+        }
 
         //做判空处理
         string title, link, description, content;
@@ -119,7 +131,7 @@ void PageLib::readFile(const string & xmlFile, size_t & totalSize)
         formateText << "<doc><docid>" << id
             << "</docid><url>" << link
             << "</url><title>" << title
-            << "</title><content>" << content
+            << "</title><content>" << title << content
             << "</content></doc>";
 
         //一篇文章输入到网页库
@@ -133,4 +145,9 @@ void PageLib::readFile(const string & xmlFile, size_t & totalSize)
 
         itemNode = itemNode->NextSiblingElement("item");
     }
+}
+
+vector<string> & PageLib::getFiles()
+{
+    return _files;
 }

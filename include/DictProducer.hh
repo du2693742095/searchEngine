@@ -25,8 +25,8 @@ class SplitTool;
 class DirtProducer
 {
 public:
-    DirtProducer(const string &confPath);
-    DirtProducer(const string &confPath, SplitTool * splitTool);//处理中文
+    DirtProducer(const string &confPath, Configuration *conf);
+    DirtProducer(const string &confPath, Configuration *conf, SplitTool * splitTool);//处理中文
     ~DirtProducer();
 
     void buildDict_EN();
@@ -41,7 +41,7 @@ private:
     void pushDict(const string & word);
 
 private:
-    Configuration _conf;
+    Configuration *_conf;
     vector<pair<string, int>> _dict;
     SplitTool * _splitTool;
     map<string, set<int>> _index;

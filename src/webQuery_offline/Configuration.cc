@@ -9,6 +9,40 @@
 #include <fstream>
 #include <iostream>
 
+/* 单例模式 */
+Configuration * Configuration::getInstance()
+{
+    if(_pInstance == nullptr){
+        std::cerr << "配置文件还未初始化";
+    }
+    return _pInstance;
+}
+
+Configuration * Configuration::getInstance(const std::string & filePath)
+{
+    if(_pInstance == nullptr){
+        _pInstance = new Configuration(filePath);
+    }
+    return _pInstance;
+}
+
+Configuration * Configuration::getInstance(const std::string && filePath)
+{
+    if(_pInstance == nullptr){
+        _pInstance = new Configuration(std::move(filePath));
+    }
+    return _pInstance;
+}
+
+void Configuration::destroyIns()
+{
+    if(_pInstance){
+        delete _pInstance;
+        _pInstance = nullptr;
+    }
+}
+
+/* 其余函数 */
 Configuration::Configuration(const std::string & filePath)
     : _filePath(filePath)
 {
