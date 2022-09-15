@@ -36,6 +36,7 @@ void PageLibPreProcessor::readInfoFromFile()
     }
 
     //读取偏移库
+    unordered_map<int, pair<int, int>> _offsetLib;//偏移库
     string line;
     line.reserve(20);
     while(std::getline(offsetOfs, line)){
@@ -72,17 +73,17 @@ void PageLibPreProcessor::deduplication()
     }
 }
 
+
+#if 1
 /* 倒排索引库结构：map<string, vector<pair<int, double>>> 
  * string为单词，int为文章id， double为单词在文章中的权重 */
 void PageLibPreProcessor::buildInvertTable()
 {
     vector<map<string, int>> freqence;//本文中的出现次数
     freqence.reserve(512);
-    map<string, int> totalFrequence;//所有文章中的出现次数
     map<string, double> inverseDocumentFrequence;//逆文档频率
     
-    int count = 0;
-
+    int idx = 0;
     //这里_freqence[count]就代表第count篇文章
     //初始化文章的频类和所有文章次数
     for(auto &page: _pageLib){
@@ -90,21 +91,98 @@ void PageLibPreProcessor::buildInvertTable()
         /* cout << pageWords.size() << " "; */
         freqence.push_back(map<string, int>());
 
-        //_freqence入队
+        //创建词频
         for(auto &word: pageWords){
             //去停用词
             if(!_jieba.isStopWord(word)){
-                freqence[count][_jieba.transferToLower(word)]++;
+                freqence[idx][_jieba.transferToLower(word)]++;
             }
         }
 
         //_totalFrequence入队
-        for(auto &word: freqence[count]){
-            ++totalFrequence[word.first];
+        for(auto &word: freqence[idx]){
+            _invertIndexTable[word.first].push_back(std::make_pair(idx + 1, word.second));
         }
-        ++count;
+        ++idx;
     }
 
+    map<size_t, double> sumOfSquares;
+
+    double IDF = 0.0, w = 0.0;
+    size_t TF = 0, DF = 0;
+    size_t N = _pageLib.size();//文章总数
+
+    //初始化倒排索引库
+    for(auto &index: _invertIndexTable){
+        DF = index.second.size(); //包含该词的Page数量
+        IDF = ::log2((N+0.1) / DF); //逆文档频率(防止DF==N)
+        for(auto &it : index.second) {
+            TF = it.second; //该词在该Page中出现的次数
+            w = TF * IDF; //权重系数
+            it.second = w; //更新权重系数
+            sumOfSquares[it.first] += ::pow(w, 2); //求权重平方和
+        }
+    }
+
+    /* 对权重系数归一化处理 */
+    for(auto &index : _invertIndexTable) {
+        for(auto &it : index.second) {
+            it.second = it.second / ::sqrt(sumOfSquares[it.first]);
+        }
+    }
+}
+#endif
+
+void PageLibPreProcessor::store()
+{
+    cout << "存储成功" << endl;
+    string path = _conf->getConfigMap().find("path_invertIndex")->second;
+    ofstream ifs(path);
+    //输出一个单词
+    for(auto &page: _invertIndexTable){
+        ifs << page.first << " ";
+        //输出一个单词对应的文章和权重
+        for(auto &p2: page.second){
+            ifs << p2.first << " "
+                << p2.second << " ";
+        }
+        ifs << '\n';
+    }
+}
+
+#if 0
+/* 倒排索引库结构：map<string, vector<pair<int, double>>> 
+ * string为单词，int为文章id， double为单词在文章中的权重 */
+void PageLibPreProcessor::buildInvertTable()
+{
+    vector<map<string, int>> freqence;//本文中的出现次数
+    freqence.reserve(512);
+    map<string, double> inverseDocumentFrequence;//逆文档频率
+    
+    int idx = 0;
+    //这里_freqence[count]就代表第count篇文章
+    //初始化文章的频类和所有文章次数
+    for(auto &page: _pageLib){
+        vector<string> pageWords = _jieba.cut(page.getContent());
+        /* cout << pageWords.size() << " "; */
+        freqence.push_back(map<string, int>());
+
+        //创建词频
+        for(auto &word: pageWords){
+            //去停用词
+            if(!_jieba.isStopWord(word)){
+                freqence[idx][_jieba.transferToLower(word)]++;
+            }
+        }
+
+        //_totalFrequence入队
+        for(auto &word: freqence[idx]){
+            _invertIndexTable[word.first].push_back(std::make_pair(idx + 1, word.second));
+        }
+        ++idx;
+    }
+
+    double IDF = 0.0;
     double w = 0.0;
     long double wTotal = 0.0;
     int totalPageSize = freqence.size();
@@ -143,21 +221,4 @@ void PageLibPreProcessor::buildInvertTable()
     /* cout << totalFrequence.size() << endl; */
     /* cout << inverseDocumentFrequence.size() << endl; */
 }
-
-void PageLibPreProcessor::store()
-{
-    cout << "存储成功" << endl;
-    string path = _conf->getConfigMap().find("path_invertIndex")->second;
-    ofstream ifs(path);
-    //输出一个单词
-    for(auto &page: _invertIndexTable){
-        ifs << page.first << " ";
-        //输出一个单词对应的文章和权重
-        for(auto &p2: page.second){
-            ifs << p2.first << " "
-                << p2.second << " ";
-        }
-        ifs << '\n';
-    }
-}
-
+#endif
