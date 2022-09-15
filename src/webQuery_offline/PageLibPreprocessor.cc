@@ -12,7 +12,10 @@ PageLibPreProcessor::PageLibPreProcessor(Configuration *conf)
     : _conf(conf)
     , _simhash(conf)
     , _jieba(conf)
-{}
+{
+    _pageLib.reserve(1000);
+    cout << "PageLibPreProcessor初始化完成！" << endl;
+}
 
 void PageLibPreProcessor::doProcess()
 {
@@ -42,38 +45,31 @@ void PageLibPreProcessor::readInfoFromFile()
         _offsetLib.insert({id, pair<int, int>(pos, size)});
     }
     //读取网页库
-    size_t indx = 0;
-    while(indx < _offsetLib.size()){
-cout << "nihao" << endl;
+    size_t indx = 1;
+    while(indx <= _offsetLib.size()){
         auto node = _offsetLib.find(indx++)->second;
         int pos = node.first;//文章首地址
         int size = node.second;//文章长度
         
-cout << "nihao" << endl;
         //读取一篇文章
         pageOfs.seekg(pos);
-cout << "nihao" << endl;
-        string page;
-        page.reserve(size);
-cout << "nihao" << endl;
-        pageOfs.get(&*page.begin(), size);
-cout << "nihao" << endl;
-        _pageLib.push_back(WebPage(page));
+        char *page = new char[size + 1]();
+        pageOfs.read(page, size);
+        /* cout << pos  << " "<< strlen(page) << " " << size << endl; */
+        _pageLib.push_back(WebPage(std::move(string(page))));
+        delete [] page;
     }
-    cout << "1" << endl;
 }
 
 void PageLibPreProcessor::deduplication()
 {
-    cout << "kaishi" << endl;
     SimHashUseToSplite sim(_conf);
     for(auto page = _pageLib.begin(); page != _pageLib.end(); ++page){
         if(sim.isRepeat(page->getContent())){
             //如果重复了，就置空
-            *page = string();
+            *page = WebPage();
         }
     }
-    cout << "wanle" << endl;
 }
 
 /* 倒排索引库结构：map<string, vector<pair<int, double>>> 
@@ -86,9 +82,12 @@ void PageLibPreProcessor::buildInvertTable()
     map<string, double> inverseDocumentFrequence;//逆文档频率
     
     int count = 0;
+
     //这里_freqence[count]就代表第count篇文章
+    //初始化文章的频类和所有文章次数
     for(auto &page: _pageLib){
         vector<string> pageWords = _jieba.cut(page.getContent());
+        /* cout << pageWords.size() << " "; */
         freqence.push_back(map<string, int>());
 
         //_freqence入队
@@ -96,7 +95,6 @@ void PageLibPreProcessor::buildInvertTable()
             //去停用词
             if(!_jieba.isStopWord(word)){
                 freqence[count][_jieba.transferToLower(word)]++;
-                ++count;
             }
         }
 
@@ -104,10 +102,8 @@ void PageLibPreProcessor::buildInvertTable()
         for(auto &word: freqence[count]){
             ++totalFrequence[word.first];
         }
+        ++count;
     }
-
-    cout << freqence.size() << endl;
-    cout << totalFrequence.size() << endl;
 
     double w = 0.0;
     long double wTotal = 0.0;
@@ -119,37 +115,39 @@ void PageLibPreProcessor::buildInvertTable()
         _invertIndexTable.insert({p.first, vector<pair<int, double>>()});
     }
 
+    cout << "3" << endl;
     //遍历所有文章的词频
-    for(map<string, int> &pageFreqence: freqence){
+    for(auto &pageFreqence: freqence){
         //遍历词频
         for(auto &word: pageFreqence){
             w = std::log(totalPageSize / totalFrequence.find(word.first)->second);    
             inverseDocumentFrequence[word.first] = w;
             wTotal += std::pow(w, 2);
         }
-
+        
         //统计最终的权重
         for(auto &word: inverseDocumentFrequence){
             w = word.second;
             double wReal = w / sqrt(wTotal);
-            word.second = wReal;
+            /* word.second = wReal; */
 
             //插入倒排索引库
             _invertIndexTable[word.first].push_back({pageId, wReal});
         }
+        ++pageId;
     }
+    cout << "3" << endl;
 
-    cout << endl;
-    cout << freqence.size() << endl;
-    cout << totalFrequence.size() << endl;
-    cout << inverseDocumentFrequence.size() << endl;
+    /* cout << endl; */
+    /* cout << freqence.size() << endl; */
+    /* cout << totalFrequence.size() << endl; */
+    /* cout << inverseDocumentFrequence.size() << endl; */
 }
 
 void PageLibPreProcessor::store()
 {
+    cout << "存储成功" << endl;
     string path = _conf->getConfigMap().find("path_invertIndex")->second;
-    cout << _conf->getConfigMap().find("path_invertIndex")->second << endl;
-    cout << _invertIndexTable.size() << endl;
     ofstream ifs(path);
     //输出一个单词
     for(auto &page: _invertIndexTable){
@@ -159,6 +157,7 @@ void PageLibPreProcessor::store()
             ifs << p2.first << " "
                 << p2.second << " ";
         }
+        ifs << '\n';
     }
 }
 

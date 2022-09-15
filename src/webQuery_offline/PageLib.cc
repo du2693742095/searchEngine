@@ -140,7 +140,7 @@ void PageLib::readFile(const string & xmlFile, size_t & totalSize)
         //输入到网页偏移库
         size_t pageSize = _files.back().size();
         pair<int, int> p1(totalSize, pageSize);
-        totalSize += pageSize;
+        totalSize += pageSize + 1;
         _offsetLib.insert(pair<int, pair<int, int>>(id, p1));
 
         itemNode = itemNode->NextSiblingElement("item");

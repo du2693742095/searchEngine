@@ -19,10 +19,11 @@ using std::map;
 using std::vector;
 using std::pair;
 
-//
+//存的是拆分后的网页
 class WebPage
 {
 public:
+    WebPage();
     WebPage(const string & doc);
     WebPage(const string && doc);
     size_t getDocId();
@@ -31,6 +32,8 @@ public:
     
     //对文档的id进行比较
     friend bool operator < (const WebPage &lhs, const WebPage &rhs);
+private:
+    void cut();
 
 private:
     size_t _docId;

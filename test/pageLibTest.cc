@@ -13,7 +13,7 @@ using std::cout;
 using std::endl;
 
 void test0(){
-    Configuration conf("../conf/serverConf.conf");
+    Configuration *conf = Configuration::getInstance("../conf/serverConf.conf");
     PageLib p(conf);
     p.create();
     p.store();

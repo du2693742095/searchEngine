@@ -35,7 +35,7 @@ vector<string> SplitToolCppJieba::cut(const string & sentence)
 }  
 
 bool SplitToolCppJieba::isStopWord(const string & word){
-    return _stopword.find(word) == _stopword.end();
+    return _stopword.find(word) != _stopword.end();
 }
 
 bool SplitToolCppJieba::isEnglish(const string & words)
