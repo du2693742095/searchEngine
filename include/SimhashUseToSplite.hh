@@ -27,8 +27,44 @@ public:
     {}
 
     ~SimHashUseToSplite(){}
+
+    bool isRepeat(string &page)
+    {
+        size_t topN = 5;//提取的索引个数
+        uint64_t u64 = 0;//返回的simhash值
+
+        //查重
+        _simhasher.make(page, topN, u64);
+        for(auto &id: _simhash){
+            if(Simhasher::isEqual(id, u64)){
+                return true;
+            }
+        }
+        _simhash.insert(u64);
+        return false;
+    }
+
+    //直接将传入的字符串数组去重
+    void deduplication(vector<string> &oldPage)
+    {
+        size_t topN = 50;//提取的索引个数
+        uint64_t u64 = 0;//返回的simhash值
+
+        //查重
+        for(auto &page: oldPage){
+            _simhasher.make(page, topN, u64);
+            for(auto &id: _simhash){
+                if(Simhasher::isEqual(id, u64)){
+                    //如果重复了，就把它的内容擦去
+                    page.clear();
+                    break;
+                }
+            }
+        }
+    }
     
-    void duduplication(vector<string> &oldPage, vector<string> & newPage)
+    //将传入的字符串数组去重后通过newPage传出
+    void deduplication(vector<string> &oldPage, vector<string> & newPage)
     {
         size_t topN = 50;//提取的索引个数
         uint64_t u64 = 0;//返回的simhash值
@@ -38,7 +74,7 @@ public:
         for(auto &page: oldPage){
             _simhasher.make(page, topN, u64);
             for(auto &id: _simhash){
-                if(isEqual(id, u64)){
+                if(Simhasher::isEqual(id, u64)){
                     isRepeat = false;
                     break;
                 }
@@ -52,6 +88,7 @@ public:
     }
     
 private:
+#if 0
     //检测两篇文章是否重复
     bool isEqual(uint64_t lhs, uint64_t rhs, unsigned short distance = 3)
     {
@@ -68,6 +105,7 @@ private:
             return false;
         }
     }
+#endif
 
 private:
     Configuration *_conf;

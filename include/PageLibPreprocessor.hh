@@ -12,22 +12,25 @@
 #include "DirScanner.hh"
 #include "WebPage.hh"
 #include "SimhashUseToSplite.hh"
+#include "SplitToolCppJieba.hh"
 
 class PageLibPreProcessor
 {
 public:
     PageLibPreProcessor(Configuration *conf);
     void doProcess();
+    void store();
 
 private:
     void readInfoFromFile();//读取网页和配置信息
+    void deduplication();
     void buildInvertTable();
-    void store();
 
 private:
     Configuration *_conf;
     SimHashUseToSplite _simhash;
-    vector<WebPage> _pageLib;
+    SplitToolCppJieba _jieba;
+    vector<WebPage> _pageLib;//存的是webpage
     unordered_map<int, pair<int, int>> _offsetLib;//偏移库
     //倒排索引库
     unordered_map<string, vector<pair<int, double>>> _invertIndexTable;

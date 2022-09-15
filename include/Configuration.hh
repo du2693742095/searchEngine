@@ -44,6 +44,5 @@ private:
     std::set<std::string> _stopWordList_ZH;
 };
 
-Configuration *Configuration::_pInstance = nullptr;
 
 #endif

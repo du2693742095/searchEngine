@@ -9,6 +9,8 @@
 #include <fstream>
 #include <iostream>
 
+Configuration *Configuration::_pInstance = nullptr;
+
 /* 单例模式 */
 Configuration * Configuration::getInstance()
 {

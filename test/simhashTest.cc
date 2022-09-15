@@ -2,45 +2,65 @@
   > File Name: a.cc
   > Author: dsy
   > Mail: dushiyang68@gmail.com
-  > Created Time: 2022年09月14日 星期三 14时23分14秒
-  > Modified Time:2022年09月14日 星期三 14时23分14秒
+  > Created Time: 2022年09月15日 星期四 10时14分57秒
+  > Modified Time:2022年09月15日 星期四 10时14分57秒
  *******************************************************/
-#include "Simhasher.hpp"
 #include <iostream>
-#include <string>
+/* #include "../../include/simhash/Simhasher.hpp" */
+#include "../../include/SimhashUseToSplite.hh"
+#include "../../include/Configuration.hh"
+#include <vector>
 
 using namespace std;
 using namespace simhash;
 
-void test()
-{
-    Simhasher simhasher("./dict/jieba.dict.utf8",
-        "./dict/hmm_model.utf8",
-        "./dict/idf.utf8",
-        "./dict/stop_words.utf8");
-    string s("我是蓝翔技工拖拉机学院手扶拖拉机专业的。不用多久，我就会升职加薪，当上总经理，出任CEO，走上人生巅峰。");
-    size_t topN = 5;
-    uint64_t u64 = 0;
-    vector<pair<string ,double> > res;
-    simhasher.extract(s, res, topN); //提取关键词与权重
-    simhasher.make(s, topN, u64); //
-    cout<< "文本：\"" << s << "\"" << endl;
-    cout << "关键词序列是: " << res << endl;
-    cout<< "simhash值是: " << u64 <<endl;
-    const char * bin1 = "100010110110";
-    const char * bin2 = "110001110011";
-    uint64_t u1, u2;
-    u1 = Simhasher::binaryStringToUint64(bin1);
-    u2 = Simhasher::binaryStringToUint64(bin2);
-    cout << bin1 << "和" << bin2 << " simhash值的相等判断如下："<<endl;
-    cout << "海明距离阈值默认设置为3，则isEqual结果为："
-    << (Simhasher::isEqual(u1, u2)) << endl;
-    cout << "海明距离阈值默认设置为5，则isEqual结果为："
-    << (Simhasher::isEqual(u1, u2, 5)) << endl;
+void test0(){
+    auto _conf = Configuration::getInstance("../../conf/serverConf.conf");
+    /* auto _path = _conf->getConfigMap(); */
+    /* cout << _path.find("path_jieba")->second << endl; */
+    /* cout << _path.find("path_hmm_model")->second << endl; */
+    /* cout << _path.find("path_idf")->second << endl; */
+    /* cout << _path.find("path_stop_words")->second << endl; */
+
+    /* Simhasher _simhasher(_path.find("path_jieba")->second, */
+    /*                _path.find("path_hmm_model")->second, */
+    /*                _path.find("path_idf")->second, */
+    /*                _path.find("path_stop_words")->second); */
+    /* Simhasher *sim; */
+
+    /* Simhasher _simhasher("../../lib/dict/jieba.dict.utf8", */
+    /*                "../../lib/dict/hmm_model.utf8", */
+    /*                "../../lib/dict/idf.utf8", */
+    /*                "../../lib/dict/stop_words.utf8"); */
+
+    SimHashUseToSplite sim(_conf);    
+
+    cout << "初始化" << endl;
+
+    vector<string> _pageLib;
+    _pageLib.push_back("nihao,woshinimama，我不知道你在说啥子哦");
+    _pageLib.push_back("nihao,woshinimama，我不知道你在说啥子哦");
+    _pageLib.push_back("wodiaonitamade, nisuosazi o，我们和平共处好不好？");
+
+    for(auto &page: _pageLib){
+        cout << page << endl;
+    }
+    cout << endl;
+
+    for(auto page = _pageLib.begin(); page != _pageLib.end(); ++page){
+        if(sim.isRepeat(*page)){
+            //如果重复了，就置空
+            *page = string();
+        }
+    }
+    for(auto &page: _pageLib){
+        cout << page << endl;
+    }
+
 }
 
 int main(){
-    test();
+    test0();
     return 0;
 }
 
