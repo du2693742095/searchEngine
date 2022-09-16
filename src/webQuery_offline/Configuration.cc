@@ -28,10 +28,10 @@ Configuration * Configuration::getInstance(const std::string & filePath)
     return _pInstance;
 }
 
-Configuration * Configuration::getInstance(const std::string && filePath)
+Configuration * Configuration::getInstance(std::string && filePath)
 {
     if(_pInstance == nullptr){
-        _pInstance = new Configuration(std::move(filePath));
+        _pInstance = new Configuration(filePath);
     }
     return _pInstance;
 }
@@ -51,7 +51,7 @@ Configuration::Configuration(const std::string & filePath)
     createConf();
 }
 
-Configuration::Configuration(const std::string && filePath)
+Configuration::Configuration(std::string && filePath)
     : _filePath(std::move(filePath))
 {
     createConf();

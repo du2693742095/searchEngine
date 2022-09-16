@@ -16,10 +16,11 @@ SplitToolCppJieba::SplitToolCppJieba(Configuration * conf)
         return;
     }
     string word;
-    while(getline(ifs_stop, word))
+    while(ifs_stop >> word)
     {
         _stopword.insert(word);
     }
+    _stopword.insert(" "); //特殊处理
 }
 
 SplitToolCppJieba::~SplitToolCppJieba()

@@ -20,6 +20,7 @@ SplitToolCppJieba::SplitToolCppJieba(Configuration * conf)
     {
         _stopword.insert(word);
     }
+    /* _stopword.insert(" "); */
 }
 
 SplitToolCppJieba::~SplitToolCppJieba()
@@ -31,6 +32,18 @@ vector<string> SplitToolCppJieba::cut(const string & sentence)
 {
     vector<string> words;
     _jieba.Cut(sentence, words, true);
+    for(auto w = words.begin(); w != words.end(); ){
+        transferToLower(*w);
+        if(isStopWord(*w)){
+            w = words.erase(w);
+        }else{
+            ++w;
+        }
+    }
+    /* for(auto w: words) */
+    /* { */
+    /*     cout << w << endl; */
+    /* } */
     return words;
 }  
 

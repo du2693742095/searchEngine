@@ -5,7 +5,7 @@
   > Created Time: 2022年09月06日 星期二 10时54分10秒
   > Modified Time:2022年09月06日 星期二 10时54分10秒
  *******************************************************/
-#include "ThreadPoll.hh"
+#include "../../include/ThreadPoll.hh"
 #include <unistd.h>
 
 ThreadPoll::ThreadPoll(size_t num, size_t size)

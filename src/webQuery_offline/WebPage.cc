@@ -16,16 +16,27 @@ using std::endl;
 
 #if 1
 WebPage::WebPage(const string & doc)
-    : _doc(doc)
 {
-    cut();
+    auto left = doc.find("<docid>") + 7;
+    auto right = doc.find("</docid>");
+    string id = doc.substr(left, right - left);
+    _docId = atoi(id.c_str());
+
+    left = doc.find("<url>") + 5;
+    right = doc.find("</url");
+    string url = doc.substr(left, right - left);
+    _docUrl = std::move(url);
+
+    left = doc.find("<title>") + 7;
+    right = doc.find("</title>");
+    string title = doc.substr(left, right - left);
+    _docTitle = std::move(title);
+
+    left = doc.find("<content>") + 9;
+    string content = doc.substr(left, doc.size() - 16 - left);
+    _docContent = std::move(content);
 }
 
-WebPage::WebPage(const string && doc)
-    : _doc(std::move(doc))
-{
-    cut();
-}
 #endif
 
 #if 0
@@ -47,28 +58,6 @@ void WebPage::cut()
     }
 }
 #endif
-
-void WebPage::cut()
-{
-    auto left = _doc.find("<docid>") + 7;
-    auto right = _doc.find("</docid>");
-    string id = _doc.substr(left, right - left);
-    _docId = atoi(id.c_str());
-
-    left = _doc.find("<url>") + 5;
-    right = _doc.find("</url");
-    string url = _doc.substr(left, right - left);
-    _docUrl = std::move(url);
-
-    left = _doc.find("<title>") + 7;
-    right = _doc.find("</title>");
-    string title = _doc.substr(left, right - left);
-    _docTitle = std::move(title);
-
-    left = _doc.find("<content>") + 9;
-    string content = _doc.substr(left, _doc.size() - 16);
-    _docContent = std::move(content);
-}
 
 size_t WebPage::getDocId()
 {
