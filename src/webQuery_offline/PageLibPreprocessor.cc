@@ -48,6 +48,7 @@ void PageLibPreProcessor::readInfoFromFile()
     }
     //读取网页库
     size_t indx = 1;
+    _pageLib.push_back(WebPage());
     while(indx <= _offsetLib.size()){
         auto node = _offsetLib.find(indx++)->second;
         int pos = node.first;//文章首地址

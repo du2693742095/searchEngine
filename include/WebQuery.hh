@@ -32,7 +32,7 @@ private:
     SplitToolCppJieba &_jieba;
     unordered_map<int, WebPageOnlie> _pageLib;//网页库
     //倒排索引
-    unordered_map<string, set<pair<int, double>>> _invertIndexTable;
+    map<string, set<pair<int, double>>> _invertIndexTable;
 
 };
 

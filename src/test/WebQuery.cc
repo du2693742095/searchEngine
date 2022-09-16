@@ -57,19 +57,18 @@ WebQuery::WebQuery(SplitToolCppJieba &jieba, Configuration *conf)
     double w;
     int id;
     while(std::getline(invertOfs, line)){
-        istringstream ist(line);
-        invertOfs >> word;
-        set<pair<int, double>> temp;
+        std::stringstream ist(line);
+        ist >> word;
         while(ist >> id >> w){
             /* cout << word << " "<< id << " " << w; */
-            temp.insert(make_pair(id, w));
+            _invertIndexTable[word].insert(make_pair(id, w));
         }
-        _invertIndexTable.insert(make_pair(word, temp));
     }
 
-        for(auto &p: _invertIndexTable["尽如人意"]){
-            cout << p.first << " " << p.second << endl;
-        }           
+/* cout << _invertIndexTable["缓存"].size() << endl; */
+/*         for(auto &p: _invertIndexTable["缓存"]){ */
+/*             cout << p.first << " " << p.second << endl; */
+/*         } */           
 }
 
 class PageCompare
@@ -193,7 +192,7 @@ bool WebQuery::executeQuery(const vector<string> &queryWords,
     //保存每个单词的set表，下标就表示查询词
     using setIter = set<pair<int, double>>::iterator;
     vector<pair<setIter, int>> iterVec; //保存需要取交集的迭代器
-    int minIterNum = -1;
+    int minIterNum = 0x7ffffff;
     
     /* cout << queryWords.size() << endl; */
     /* for(auto &w: queryWords){ */
@@ -204,12 +203,6 @@ bool WebQuery::executeQuery(const vector<string> &queryWords,
     for(auto &it : queryWords) {
         int size = _invertIndexTable[it].size();
         
-        /* cout << size << endl; */
-        /* cout << it << endl; */
-        /* for(auto &p: _invertIndexTable[it]){ */
-        /*     cout << p.first << " "<<  p.second << endl; */
-        /* } */
-
         if(size == 0) {
             return false;
         }
@@ -245,7 +238,7 @@ bool WebQuery::executeQuery(const vector<string> &queryWords,
         }
         else
         {   //找到最小的docid，并保存其所在的iter++
-            int minDocId = -1;
+            int minDocId = 0x7ffffff;
             int iterIdx;//保存minDocId的迭代器位置
             for(idx = 0; idx != iterVec.size(); ++idx)
             {

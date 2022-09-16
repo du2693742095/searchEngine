@@ -21,6 +21,8 @@ WebPageOnlie::WebPageOnlie(const string & doc)
     cut(doc);
 }
 
+/* #include <iostream> */
+
 void WebPageOnlie::cut(const string &_doc)
 {
     auto left = _doc.find("<docid>") + 7;
@@ -61,6 +63,9 @@ string & WebPageOnlie::getUrl()
 // 获取所查询词的摘要信息
 string & WebPageOnlie::getSummery(const vector<string> &queryWords)
 {
+    /* std::cout << _docContent<< std::endl << std::endl; */
+    /* std::cout << _docTitle<< std::endl; */
+    
     vector<string> summaryCount;
     std::istringstream is(_docContent);
     string line;
@@ -68,7 +73,13 @@ string & WebPageOnlie::getSummery(const vector<string> &queryWords)
     while(std::getline(is, line)) {
         for(auto &word : queryWords) {
             if(line.find(word) != string::npos && summaryCount.size() < 3) {
-                summaryCount.push_back(line);
+                if(line.size() > 60){
+                    auto idx = line.find(word);
+                    summaryCount.push_back(line.substr(idx - 30, idx + 30));
+                }
+                else{
+                    summaryCount.push_back(line);
+                }
             }
         }
     }

@@ -7,5 +7,12 @@
  *******************************************************/
 #include "../../include/WebPageSearcher.hh"
 
-Wab::WebPageSearcher(const string &key, const TcpConnection *conn);
-void doQuery();
+WebPageSearcher::WebPageSearcher(const string &key, const TcpConnection *conn)
+{
+
+}
+
+void WebPageSearcher::doQuery()
+{
+
+}
