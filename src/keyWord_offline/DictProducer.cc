@@ -1,24 +1,19 @@
-/***********************************************************
-  > File Name: DictProducer.cc
-  > Author: dsy
-  > Mail: dushiyang68@gmail.com
-  > Created Time: 2022年09月13日 星期二 14时48分27秒
-  > Modified Time:2022年09月13日 星期二 14时48分27秒
- *******************************************************/
 #include "../../include/DictProducer.hh"
+#include "../../include/SplitToolCppJieba.hh"
+#include "../../include/DirScanner.hh"
 
-DirtProducer::DirtProducer(const string &confPath)
-    : _conf(confPath)
-    , _dict()
-    , _splitTool(nullptr)
-    , _index()
-{}
-
-DirtProducer::DirtProducer(const string &confPath, SplitTool * splitTool)
-    : _conf(confPath)
-    , _dict()
-    , _splitTool(splitTool)
-    , _index()
+DirtProducer::DirtProducer(Configuration * conf)//默认处理英文
+:_conf(conf)
+,_splitTool(nullptr)
+,_files(DirScanner()(_conf->getConfigMap().find("path_TXT_EN")->second))
+{
+    _dict.reserve(10000);
+}
+    
+DirtProducer::DirtProducer(Configuration * conf, SplitToolCppJieba * splitTool)//处理中文
+:_conf(conf)
+,_splitTool(splitTool)
+,_files(DirScanner()(_conf->getConfigMap().find("path_TXT_ZH")->second))
 {}
 
 DirtProducer::~DirtProducer()
@@ -26,38 +21,130 @@ DirtProducer::~DirtProducer()
 
 void DirtProducer::buildDict_EN()
 {
-    
+    unordered_map<string, int> tmpdict;
+    for(auto & elem : _files)
+    {
+        ifstream ifs(elem);
+        string strline, word;
+        while(getline(ifs,strline))
+        {
+            stringstream iss(strline);
+            while(iss >> word)
+            {
+                if(!_splitTool->isStopWord(word))
+                    ++tmpdict[_splitTool->transferToLower(word)];
+            }
+        }
+    }
+    for(auto & e : tmpdict)
+    {
+        _dict.push_back(e);
+    }
+    int line_no = 1; //行号
+    for(auto & e : _dict)
+    {
+        _index.insert({e.first,line_no++});
+    }
 }
 
 void DirtProducer::buildDict_ZH()
 {
-
+    unordered_map<string, int> tmpdict;
+    for(auto & elem : _files)
+    {
+        ifstream ifs(elem);
+        string strline;
+        while(getline(ifs,strline))
+        {
+            vector<string> tmp = _splitTool->cut(strline);
+            for(auto & word :tmp)
+            {
+               if(!_splitTool->isStopWord(word) && !(word.find_first_not_of("0123456789.") == string::npos))
+                    ++tmpdict[word];
+            }
+        }
+    }
+    for(auto & e : tmpdict)
+    {
+        _dict.push_back(e);
+    }
+    int line_no = 1; //行号
+    for(auto & e : _dict)
+    {
+        _index.insert({e.first,line_no++});
+    }
 }
 
 void DirtProducer::storeDict(const string & filePath)
 {
-
+    string path_dictIndex = filePath + "/data/dictIndex.dat";
+    string path_dict =  filePath + "/data/dict.dat";
+    ofstream ofs_dictIndex(path_dictIndex);
+    ofstream ofs_dict(path_dict);
+    if(!ofs_dict.good())
+    {
+        cout << "open file error" << endl;
+        return;
+    }
+    if(!ofs_dictIndex.good())
+    {
+        cout << "open file error" << endl;
+        return;
+    }
+    for(auto & elem : _dict)
+    {
+       ofs_dict << elem.first << " " << elem.second << endl;
+    }
+    
+    for(auto & elem : _index)
+    {
+        ofs_dictIndex << elem.first << " " << elem.second << endl;
+    }
+    ofs_dict.close();
+    ofs_dictIndex.close();
 }
 
 void DirtProducer::showDirt()
 {
+    cout << "-----------------------Dict-----------------------" << endl;
+    for(auto & elem : _dict)
+    {
+        cout << "word :" << elem.first << " frequence:" << elem.second << endl;
+    }
 
+    cout << "-----------------------Index-----------------------" << endl;
+    for(auto & elem : _index)
+    {
+        cout << "word:" << elem.first << " line:" << elem.second << endl;
+    }
 }
 
-//如果不指明地址，就默认用配置文件里面的
-void DirtProducer::storeDict()
+void DirtProducer::storeDict()//如果不指明地址，就默认用配置文件里面的
 {
+    ofstream ofs_dict(_conf->getConfigMap().find("path_dict")->second);
+    if(!ofs_dict.good())
+    {
+        cout << "open file error" << endl;
+        return;
+    }
+    ofstream ofs_dictIndex(_conf->getConfigMap().find("path_dictIndex")->second);
+    if(!ofs_dictIndex.good())
+    {
+        cout << "open file error" << endl;
+        return;
+    }
+    for(auto & elem : _dict)
+    {
+       
+        ofs_dict << elem.first << " " << elem.second << endl;
+       
+    }
 
+    for(auto & elem : _index)
+    {
+        ofs_dictIndex << elem.first << " " << elem.second << endl;
+    }
+    ofs_dict.close();
+    ofs_dictIndex.close();
 }
-
-void DirtProducer::getFiles()
-{
-
-}
-
-void DirtProducer::pushDict(const string & word)
-{
-
-}
-
 

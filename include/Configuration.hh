@@ -17,7 +17,7 @@ class Configuration
 public:
     static Configuration * getInstance();
     static Configuration * getInstance(const std::string & filePath);
-    static Configuration * getInstance(const std::string && filePath);
+    static Configuration * getInstance(std::string && filePath);
     static void destroyIns();
 
     std::map<std::string, std::string> & getConfigMap();
@@ -28,7 +28,7 @@ public:
 
 private:
     Configuration(const std::string & filePath);
-    Configuration(const std::string && filePath);
+    Configuration(std::string && filePath);
     ~Configuration(){}
 
     Configuration(const Configuration &) = delete ;
