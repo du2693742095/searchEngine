@@ -19,6 +19,7 @@ PageLibPreProcessor::PageLibPreProcessor(Configuration *conf)
 
 void PageLibPreProcessor::doProcess()
 {
+    cout << "创建倒排索引库" << endl;
     readInfoFromFile();
     deduplication();
     buildInvertTable();
@@ -135,7 +136,7 @@ void PageLibPreProcessor::buildInvertTable()
 
 void PageLibPreProcessor::store()
 {
-    cout << "存储成功" << endl;
+    cout << "倒排索引库存储ing！" << endl;
     string path = _conf->getConfigMap().find("path_invertIndex")->second;
     ofstream ifs(path);
     //输出一个单词

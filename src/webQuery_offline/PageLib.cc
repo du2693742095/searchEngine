@@ -33,6 +33,7 @@ PageLib::PageLib(Configuration *conf)
 
 void PageLib::create()
 {
+    std::cout << "开始建立网页库和网页偏移库" << std::endl;
     vector<string> dir = _dir.getFiles();
     size_t totalSize = 0;
     
@@ -44,7 +45,7 @@ void PageLib::create()
 
 void PageLib::store()
 {
-    std::cout << "存储！" << std::endl;
+    std::cout << "存储网页库和倒排索引库！" << std::endl;
     string ripePagePath = _conf->getConfigMap().find("path_newRipePage")->second;
     string offsetPagePath = _conf->getConfigMap().find("path_newOffset")->second;
 
