@@ -28,6 +28,7 @@ public:
     WebPage(const string && doc);
     size_t getDocId();
     string & getTitle();
+
     string & getContent();
     
     //对文档的id进行比较

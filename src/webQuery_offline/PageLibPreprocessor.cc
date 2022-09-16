@@ -95,7 +95,7 @@ void PageLibPreProcessor::buildInvertTable()
         //创建词频
         for(auto &word: pageWords){
             //去停用词
-            if(!_jieba.isStopWord(word)){
+            if(!_jieba.isStopWord(word) && (word.find_first_not_of("0123456789.") != string::npos)){
                 freqence[idx][_jieba.transferToLower(word)]++;
             }
         }
