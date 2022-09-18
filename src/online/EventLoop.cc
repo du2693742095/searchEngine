@@ -5,9 +5,9 @@
   > Created Time: 2022年09月08日 星期四 14时54分45秒
   > Modified Time:2022年09月08日 星期四 14时54分45秒
  *******************************************************/
-#include "Acceptor.hh"
-#include "TcpConnection.hh"
-#include "EventLoop.hh"
+#include "../../include/Acceptor.hh"
+#include "../../include/TcpConnection.hh"
+#include "../../include/EventLoop.hh"
 #include <sys/eventfd.h>
 
 EventLoop::EventLoop(Acceptor & listen)
@@ -45,7 +45,7 @@ void EventLoop::waitEpollFd()
 {
     int nready = 0;
     do{
-        nready = epoll_wait(_epollfd, &*_eventList.begin(), _eventList.size(), 3000);
+        nready = epoll_wait(_epollfd, &*_eventList.begin(), _eventList.size(), 5000);
     }while(-1 == nready && errno == EINTR);
 
     if(-1 == nready){
@@ -74,13 +74,16 @@ void EventLoop::waitEpollFd()
             }
             //线程池发送过来的消息
             else if(fd == _eventfd){
+
+printf("检测到有消息要发送\n");
+
                 ReadEventFd();
                 runPengdingFunc();
             }
             //旧链接发来消息
             else {
                 if(_eventList[i].events & EPOLLIN){
-                    /* printf("旧链接发消息了\n"); */
+printf("旧链接发消息了\n");
                     handleMessage(fd);
                 }
             }
@@ -110,7 +113,7 @@ void EventLoop::handNewConnection()
     _cones.insert(std::pair<int, TcpConnectionPtr>(peerfd, newNode));
 
     newNode->handleConnectionCallBack();
-/* printf("新连接开始了\n"); */
+printf("新连接开始了\n");
 }
 
 void EventLoop::handleMessage(int fd)
@@ -230,6 +233,7 @@ void EventLoop::runPengdingFunc()
     }
     //执行发送函数
     for(auto &cb : temp){
+        printf("发送消息的函数入队\n");
         cb();
     }
 }

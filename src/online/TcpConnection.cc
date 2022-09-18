@@ -24,6 +24,8 @@ TcpConnection::~TcpConnection()
 //无所谓左值还是右值
 void TcpConnection::sendmsg(const std::string & msg)
 {
+    printf("TcpConnection发送消息\n");
+
     _sockIO.writen(msg.c_str(), msg.size());
 }
 

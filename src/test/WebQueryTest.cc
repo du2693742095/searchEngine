@@ -15,7 +15,7 @@ void test0(){
     Configuration *conf = Configuration::getInstance("../../conf/serverConf.conf");
     SplitToolCppJieba jieba(conf);
     WebQuery w(jieba, conf);
-    cout << w.doQuery("缓存") << endl;
+    cout << w.doQuery("本篇read post") << endl;
 }
 
 int main(){

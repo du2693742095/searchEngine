@@ -9,25 +9,30 @@
 #define __THREADTASK_HH__
 
 #include "TcpConnection.hh"
+#include "WebQuery.hh"
+#include "Dictionary.hh"
+#include "hiRedis.hh"
 #include <iostream>
 
 class ThreadTask
 {
-public:
-    ThreadTask(const std::string &msg, TcpConnection & con)
-        : _msg(msg)
-        , _con(con)
-    {}
+    using TcpConnectionPtr = shared_ptr<TcpConnection>;
 
-    void process()
-    {
-        std::cout << "线程执行任务完成！" << std::endl;
-        _con.sendToEpollLoop(_msg);
-    }
+public:
+    ThreadTask(const std::string &msg, const TcpConnectionPtr &con, 
+               HiRedis * redis, WebQuery & webQuery, Dictionary *dict);
+ 
+    void process();
 
 private:
-    std::string _msg;
-    TcpConnection & _con;
+    std::string _msg;//还没解析过的包
+    TcpConnectionPtr _conn;
+
+    HiRedis * _redis;
+    //单词和网页的库查询文件
+    WebQuery & _webQuery;
+    Dictionary *_dict;
+    
 };
 
 #endif

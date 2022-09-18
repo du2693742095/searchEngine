@@ -10,6 +10,10 @@
 
 #include "TcpServer.hh"
 #include "ThreadPoll.hh"
+#include "SplitToolCppJieba.hh"
+#include "WebQuery.hh"
+#include "Dictionary.hh"
+#include "hiRedis.hh"
 #include <string>
 #include <memory>
 
@@ -18,8 +22,7 @@ class EchoServer
     using TcpConnectionPtr = std::shared_ptr<TcpConnection>;
 
 public:
-    EchoServer(size_t numi, size_t size,
-               const std::string &ip, unsigned short port);
+    EchoServer(const string & confPath);
     ~EchoServer();
 
     void start();
@@ -31,8 +34,19 @@ private:
     void onClose(const TcpConnectionPtr &);
 
 private:
+    //配置文件指针
+    Configuration * _conf;
+
     std::unique_ptr<ThreadPoll> _poll;
     std::unique_ptr<TcpServer> _server;
+
+    std::unique_ptr<HiRedis> _redis;
+    SplitToolCppJieba _jieba;//jieba库文件
+
+    //初始化网页查询库和单词查询库
+    WebQuery _webQuery;
+    Dictionary * _dict;
+
 };
 
 #endif

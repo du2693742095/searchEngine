@@ -18,9 +18,11 @@ WebQuery::WebQuery(SplitToolCppJieba &jieba, Configuration *conf)
     //初始化网页库和倒排索引库
     string pageLibPath = conf->getConfigMap().find("path_newRipePage")->second;
     string offsetLib = conf->getConfigMap().find("path_newOffset")->second;
+    string invertLib = conf->getConfigMap().find("path_invertIndex")->second;
     std::ifstream pageOfs(pageLibPath);
     std::ifstream offsetOfs(offsetLib);
-    if(!pageOfs.is_open() || !offsetOfs.is_open()){
+    std::ifstream invertOfs(invertLib);
+    if(!pageOfs.is_open() || !offsetOfs.is_open() || !invertOfs.is_open()){
         cerr << "fail to open in PageLibPreProcessor";
     }
 
@@ -49,6 +51,24 @@ WebQuery::WebQuery(SplitToolCppJieba &jieba, Configuration *conf)
         _pageLib.insert(make_pair(indx, WebPageOnlie(std::move(string(page)))));
         delete [] page;
     }
+
+    //读取倒排索引库
+    string word;
+    double w;
+    int id;
+    while(std::getline(invertOfs, line)){
+        std::stringstream ist(line);
+        ist >> word;
+        while(ist >> id >> w){
+            /* cout << word << " "<< id << " " << w; */
+            _invertIndexTable[word].insert(make_pair(id, w));
+        }
+    }
+
+/* cout << _invertIndexTable["缓存"].size() << endl; */
+/*         for(auto &p: _invertIndexTable["缓存"]){ */
+/*             cout << p.first << " " << p.second << endl; */
+/*         } */           
 }
 
 class PageCompare
@@ -92,11 +112,11 @@ string WebQuery::doQuery(const string &str)
     vector<string> queryWords;
     queryWords = _jieba.cut(str);
 
-    //测试一下
     /* string words; */
     /* for(auto &it : queryWords) { */
     /*     words.append(it + ", "); */
     /* } */
+    /* return words; */
 
     for(auto &it : queryWords) {
         if(_invertIndexTable.find(it) == _invertIndexTable.end()) {
@@ -114,6 +134,7 @@ string WebQuery::doQuery(const string &str)
     //如果没找到，那就返回空
     if(executeQuery(queryWords, resultVec)) {
         //排序
+        cout << "查出来的篇数: " << resultVec.size() << endl;
         PageCompare cmp(queryWordsWeight);
         std::sort(resultVec.begin(), resultVec.end(), cmp);
 
@@ -121,7 +142,6 @@ string WebQuery::doQuery(const string &str)
         for(auto &it : resultVec) {
             docidVec.push_back(it.first);
         }
-
         return createJSON(docidVec, queryWords);
     }
     else {
@@ -173,8 +193,16 @@ bool WebQuery::executeQuery(const vector<string> &queryWords,
     using setIter = set<pair<int, double>>::iterator;
     vector<pair<setIter, int>> iterVec; //保存需要取交集的迭代器
     int minIterNum = 0x7ffffff;
+    
+    /* cout << queryWords.size() << endl; */
+    /* for(auto &w: queryWords){ */
+    /*     cout << w << endl; */
+    /* } */
+
+    //查找所有关键词对应的文章id和权重
     for(auto &it : queryWords) {
         int size = _invertIndexTable[it].size();
+        
         if(size == 0) {
             return false;
         }
@@ -184,14 +212,13 @@ bool WebQuery::executeQuery(const vector<string> &queryWords,
         iterVec.push_back(make_pair(_invertIndexTable[it].begin(), 0));
     }
 
-    bool isExiting = false;
-    while(!isExiting) {
+    bool isContinue = true;
+    while(isContinue) {
         size_t idx = 0;
         for(; idx != iterVec.size() - 1; ++idx)
         {
             if((iterVec[idx].first)->first != iterVec[idx+1].first->first)
                 break;
-
         }
 
         if(idx == iterVec.size() - 1)
@@ -204,14 +231,14 @@ bool WebQuery::executeQuery(const vector<string> &queryWords,
                 ++(iterVec[idx].first);//相同时，将每一个迭代器++
                 ++(iterVec[idx].second);//同时记录迭代器++的次数
                 if(iterVec[idx].second == minIterNum)
-                {   isExiting = true;   }
+                {   isContinue = false;   }
 
             }
             resultVec.push_back(make_pair(docid, weightVec));
         }
         else
-        {   //找到最小的docid，并将其所在的iter++
-            int minDocId = 0x7FFFFFFF;
+        {   //找到最小的docid，并保存其所在的iter++
+            int minDocId = 0x7ffffff;
             int iterIdx;//保存minDocId的迭代器位置
             for(idx = 0; idx != iterVec.size(); ++idx)
             {
@@ -227,7 +254,7 @@ bool WebQuery::executeQuery(const vector<string> &queryWords,
             ++(iterVec[iterIdx].first);
             ++(iterVec[iterIdx].second);
             if(iterVec[iterIdx].second == minIterNum)
-            {   isExiting = true;   }
+            {   isContinue = false;   }
         }
 
     }
@@ -249,7 +276,8 @@ string WebQuery::createJSON(vector<int> &docId, const vector<string> &queryWords
         ret._msg.push_back(page.getUrl());
         ret._msg.push_back(page.getSummery(queryWords));
     }
-    ret._msgLen = sizeof(ret._msg);
+    ret._msgLen = docId.size();
+    /* cout << "查出来的篇数:" << docId.size()<< endl; */
 
     json j;
     to_json(j, ret);
@@ -261,8 +289,8 @@ string WebQuery::returnNoAnswer(const string & msg)
     Msg ret;
     ret._ID = 200;
     ret._msg = vector<string>();
-    ret._msg.push_back("为您找到相关结果0个 " + msg + " 抱歉没有找到与“”相关的网页。");
-    ret._msgLen = sizeof(ret._msg);
+    ret._msg.push_back("抱歉没有找到与“" + msg + "”相关的网页。");
+    ret._msgLen = 0;
     json j;
     to_json(j, ret);
     return j.dump();

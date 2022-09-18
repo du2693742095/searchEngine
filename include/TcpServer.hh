@@ -33,37 +33,4 @@ private:
     EventLoop _loop;
 };
 
-TcpServer::TcpServer(const std::string &ip, unsigned short port)
-    : _acceptor(ip, port)
-    , _loop(_acceptor)
-{}
-
-TcpServer::TcpServer(const std::string && ip, unsigned short port)
-    : _acceptor(std::move(ip), port)
-    , _loop(_acceptor)
-{}
-
-TcpServer::~TcpServer()
-{}
-
-void TcpServer::start()
-{
-    _acceptor.ready();
-    _loop.loop();
-}
-
-void TcpServer::stop()
-{
-    _loop.unloop();
-}
-
-void TcpServer::setAllCallBack(callBackFunc && newConnetionFunc,
-                    callBackFunc && messageFunc, 
-                    callBackFunc && closeFunc)
-{
-    _loop.setConnectionCallBack(std::move(newConnetionFunc));
-    _loop.setMessageCallBack(std::move(messageFunc));
-    _loop.setCloseCallBack(std::move(closeFunc));
-}
-
 #endif

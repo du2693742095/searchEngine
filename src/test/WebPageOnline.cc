@@ -73,13 +73,7 @@ string & WebPageOnlie::getSummery(const vector<string> &queryWords)
     while(std::getline(is, line)) {
         for(auto &word : queryWords) {
             if(line.find(word) != string::npos && summaryCount.size() < 3) {
-                if(line.size() > 60){
-                    auto idx = line.find(word);
-                    summaryCount.push_back(line.substr(idx - 30, idx + 30));
-                }
-                else{
-                    summaryCount.push_back(line);
-                }
+                summaryCount.push_back(line);
             }
         }
     }

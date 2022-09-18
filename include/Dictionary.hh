@@ -37,11 +37,13 @@ public:
     //静态函数
     static Dictionary* createInstance();
     //通过词典文件路径初始化词典
-    void init(const string &dictpath);
+    void init(const string &dict, const string &dictIndex);
     //获取词典
     vector<pair<string, int>> &getDict();
     //获取索引表
     map<string, set<int>> &getIndexTable();
+    //调试打印
+    void show();
     
 private:
     Dictionary(){}

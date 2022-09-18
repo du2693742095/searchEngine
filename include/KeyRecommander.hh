@@ -15,7 +15,7 @@
 #include <queue>
 
 #include "EditDistance.hh"
-#include "TcpServer.hh"
+/* #include "TcpServer.hh" */
 #include "CandidateResult.hh"
 #include "Dictionary.hh"
 
@@ -54,21 +54,21 @@ struct MyCompare
 
 class KeyRecommander
 {
-    using TcpConnectionPtr = std::shared_ptr<TcpConnection>;
+    /* using TcpConnectionPtr = std::shared_ptr<TcpConnection>; */
 public:
     //构造函数，传入查询词和连接
-    KeyRecommander(string& queryWord, const TcpConnectionPtr& conn)
+    KeyRecommander(const string& queryWord)
     :_queryWord(queryWord)
-    ,_conn(conn)
+    /* ,_conn(conn) */
     {}
 
     //执行查询
-    void execute(Dictionary& dict);
+    void execute(Dictionary * dict);
     //响应客户端的请求
-    void response();
+    string response();
 private:
     //查询索引
-    set<int> queryIndexTable(Dictionary& dict);
+    set<int> queryIndexTable(Dictionary* dict);
     //计算最小编辑距离
     int distance(const string & rhs);
 private:
@@ -77,7 +77,7 @@ private:
     //索引集合
     set<string> _idxSet;
     //连接
-    TcpConnectionPtr _conn;
+    /* TcpConnectionPtr _conn; */
     //保存候选结果集的优先级队列
     priority_queue<CandidateResult,vector<CandidateResult>,MyCompare> _resultQue;
 };

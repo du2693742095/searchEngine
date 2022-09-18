@@ -19,7 +19,7 @@ using json = nlohmann::json;
 
 struct Player
 {
-    string name;
+    vector<string> name;
     int credits;
     int ranking;
 };
@@ -34,14 +34,16 @@ void to_json(json &j, const Player &p)
 #endif
 
 #if 1
-void from_json(const json &j, Player &p)
+void from_json(const string &msg, Player &p)
 {
+    json j = json::parse(msg);
     j.at("name").get_to(p.name);
     j.at("credits").get_to(p.credits);
     j.at("ranking").get_to(p.ranking);
 }
 #endif
 
+#if 0
 void test()
 {
     auto j = R"([
@@ -52,20 +54,38 @@ void test()
     vector<Player> players = j.get<vector<Player>>();
     /* vector<Player> players; */
     /* j.get_to(players); */
-    cout<< "name:" << players[2].name << endl;
+    /* cout<< "name:" << players[2].name << endl; */
     cout<< "credits:" << players[2].credits << endl;
     cout<< "ranking:" << players[2].ranking << endl;
 }
+#endif
 
 void test3()
 {
-    auto j3 = json::parse(R"({"happy": true, "pi": 3.141})");
+    json j3 = json::parse(R"({"happy": true, "pi": 3.141, "msg":["d","s","why","ary","did"]})");
     cout << "j3 = " << j3 << endl;
     json j_string = "this is a string";
     auto cpp_string = j_string.get<std::string>();
     cout << "cpp_string = " << cpp_string << endl;
+
+    Player p;
+    j3.at("msg").get_to(p.name);
+    for(auto &a: p.name){
+        cout << a << endl;
+    }
+
+    cout << endl;
+    string msg = R"({"happy": true, "pi": 3.141, "msg":["d","s","why","ary","did"]})";
+    /* from_json(msg, p); */
+    json j4 = json::parse(msg);
+    j4.at("msg").get_to(p.name);
+    for(auto &a: p.name){
+        cout << a << endl;
+    }
+
 }
 
+#if 0
 void test4()
 {
     json j_string = "this is a string";
@@ -79,8 +99,14 @@ void test4()
     std::cout << j_string
     << " == " << serialized_string << std::endl;
 }
+#endif
+
 int main()
 {
-    test();
+    /* test(); */
+    /* cout << endl; */
+    test3();
+    /* cout << endl; */
+    /* test4(); */
     return 0;
 }
