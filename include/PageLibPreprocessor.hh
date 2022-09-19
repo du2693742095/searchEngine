@@ -31,7 +31,7 @@ private:
     SimHashUseToSplite _simhash;
     SplitToolCppJieba _jieba;
     vector<WebPage> _pageLib;//存的是webpage
-    unordered_map<int, pair<int, int>> _offsetLib;//偏移库
+    /* unordered_map<int, pair<int, int>> _offsetLib;//偏移库 */
     //倒排索引库
     unordered_map<string, vector<pair<int, double>>> _invertIndexTable;
 
