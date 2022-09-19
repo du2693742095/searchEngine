@@ -74,16 +74,12 @@ void EventLoop::waitEpollFd()
             }
             //线程池发送过来的消息
             else if(fd == _eventfd){
-
-printf("检测到有消息要发送\n");
-
                 ReadEventFd();
                 runPengdingFunc();
             }
             //旧链接发来消息
             else {
                 if(_eventList[i].events & EPOLLIN){
-printf("旧链接发消息了\n");
                     handleMessage(fd);
                 }
             }
@@ -113,7 +109,6 @@ void EventLoop::handNewConnection()
     _cones.insert(std::pair<int, TcpConnectionPtr>(peerfd, newNode));
 
     newNode->handleConnectionCallBack();
-printf("新连接开始了\n");
 }
 
 void EventLoop::handleMessage(int fd)
@@ -126,7 +121,6 @@ void EventLoop::handleMessage(int fd)
             _cones.erase(fd);
         }
         else{
-            /* printf("处理新消息\n"); */
             it->second->handleMessageCallBacl();
         }
     }
@@ -233,7 +227,6 @@ void EventLoop::runPengdingFunc()
     }
     //执行发送函数
     for(auto &cb : temp){
-        printf("发送消息的函数入队\n");
         cb();
     }
 }

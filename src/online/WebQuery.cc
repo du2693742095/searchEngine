@@ -36,6 +36,7 @@ WebQuery::WebQuery(SplitToolCppJieba &jieba, Configuration *conf)
         str >> id >> pos >> size;
         _offsetLib.insert({id, pair<int, int>(pos, size)});
     }
+
     //读取网页库
     size_t indx = 1;
     while(indx <= _offsetLib.size()){
@@ -112,13 +113,17 @@ string WebQuery::doQuery(const string &str)
     vector<string> queryWords;
     queryWords = _jieba.cut(str);
 
-    /* string words; */
-    /* for(auto &it : queryWords) { */
-    /*     words.append(it + ", "); */
-    /* } */
-    /* return words; */
+    //测试检测
+    for(auto &it : queryWords) {
+        cout << it << ",";
+    }
+    cout << endl;
 
     for(auto &it : queryWords) {
+        //区分中英文，英文需要转换大小写
+        if(_jieba.isEnglish(it)){
+            _jieba.transferToLower(it);
+        }
         if(_invertIndexTable.find(it) == _invertIndexTable.end()) {
             return returnNoAnswer(str);
         }
@@ -133,6 +138,10 @@ string WebQuery::doQuery(const string &str)
     //如果找到了，那就排序网页
     //如果没找到，那就返回空
     if(executeQuery(queryWords, resultVec)) {
+        if(resultVec.size() == 0){
+            return returnNoAnswer(str);
+        }
+        
         //排序
         cout << "查出来的篇数: " << resultVec.size() << endl;
         PageCompare cmp(queryWordsWeight);
@@ -142,6 +151,7 @@ string WebQuery::doQuery(const string &str)
         for(auto &it : resultVec) {
             docidVec.push_back(it.first);
         }
+
         return createJSON(docidVec, queryWords);
     }
     else {
@@ -278,6 +288,10 @@ string WebQuery::createJSON(vector<int> &docId, const vector<string> &queryWords
     }
     ret._msgLen = docId.size();
     /* cout << "查出来的篇数:" << docId.size()<< endl; */
+
+    cout << ret._msg[0] << endl;
+    cout << ret._msg[1] << endl;
+    cout << ret._msg[2] << endl;
 
     json j;
     to_json(j, ret);

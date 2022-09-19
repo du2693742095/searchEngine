@@ -24,6 +24,7 @@ void KeywordsSearcher::doQuery()
     /* 去redis里面查找，底层用的是是trig类型，所以查找时候把查找的key用指令做区分
      * 单词查询的后面加_1，网页查询的加_2，用来查询 */
     if(result.size() == 0){
+        cout << "在单词库里面查询" << endl;
         KeyRecommander k(_sought);
         k.execute(_diction);
         result = k.response();
@@ -31,6 +32,7 @@ void KeywordsSearcher::doQuery()
         _hiredis->set(_sought + "_1", result);
     }
     
+    cout << result << endl;
     //发送
     _conn->sendToEpollLoop(result);
 }

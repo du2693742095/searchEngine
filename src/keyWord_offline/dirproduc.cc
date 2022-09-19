@@ -13,23 +13,17 @@ using std::cin;
 using std::cout;
 using std::endl;
 
-void test0()
+int main()
 {
     const string confpath("../conf/serverConf.conf");
-  
+ 
     Configuration *p = Configuration::getInstance(confpath);
     SplitToolCppJieba *sp = new SplitToolCppJieba(p);
     DirtProducer dicp(p,sp);
     dicp.buildDict_ZH();
     /* dicp.showDirt(); */
     dicp.storeDict();
-    /* cout << sp->isStopWord(".") << endl; */
     cout << "done" << endl;
 }
 
-int main()
-{
-    test0();
-    return 0;
-}
 

@@ -56,9 +56,6 @@ void ThreadPoll::stop()
 void ThreadPoll::addTask(const Task & task)
 {
     if(task){
-
-printf("任务来了，添加到线程池任务队列中了\n");
-
         _taskQueue->inQueue(task);
     }
 }
@@ -66,9 +63,6 @@ printf("任务来了，添加到线程池任务队列中了\n");
 void ThreadPoll::addTask(const Task && task)
 {
     if(task){
-
-printf("任务来了，添加到线程池任务队列中了\n");
-
         _taskQueue->inQueue(std::move(task));
     }
 }
@@ -82,7 +76,6 @@ void ThreadPoll::threadFunc()
 {
     while(!_isExit){
         Task task = getTask();
-printf("线程池拿到任务，准备执行\n");
         if(task){
             task();
         }

@@ -69,6 +69,7 @@ void EchoServer::onConnection(const TcpConnectionPtr &con)
 
 void EchoServer::onMessage(const TcpConnectionPtr &con)
 {
+    /* cout << "EchoServer::onMessage()" << endl; */
     std::string msg = con->recvmsg();
     std::cout << ">>recv: " << msg << std::endl;
 

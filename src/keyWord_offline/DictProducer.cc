@@ -14,7 +14,9 @@ DirtProducer::DirtProducer(Configuration * conf, SplitToolCppJieba * splitTool)/
 :_conf(conf)
 ,_splitTool(splitTool)
 ,_files(DirScanner()(_conf->getConfigMap().find("path_TXT_ZH")->second))
-{}
+{
+    _dict.reserve(10000);
+}
 
 DirtProducer::~DirtProducer()
 {}
@@ -36,14 +38,33 @@ void DirtProducer::buildDict_EN()
             }
         }
     }
+
     for(auto & e : tmpdict)
     {
-        _dict.push_back(e);
+        _dict.emplace_back(std::move(e));
     }
+
+
     int line_no = 1; //行号
+    string word;
     for(auto & e : _dict)
     {
-        _index.insert({e.first,line_no++});
+        for(size_t i = 0; i < e.first.size();)
+        {
+            if(_splitTool->isEnglish(e.first)){
+                word = e.first[i];
+                ++i;
+            }else
+            {   
+                word = e.first.substr(0,3);
+                i+=3;
+            }
+            if(e.first.find(word) != string::npos)
+            {
+                _index[word].insert(line_no);
+            }
+        }
+        ++line_no;
     }
 }
 
@@ -60,18 +81,37 @@ void DirtProducer::buildDict_ZH()
             for(auto & word :tmp)
             {
                if(!_splitTool->isStopWord(word) && !(word.find_first_not_of("0123456789.") == string::npos))
-                    ++tmpdict[word];
+                    ++tmpdict[_splitTool->transferToLower(word)];
             }
         }
     }
+
     for(auto & e : tmpdict)
     {
-        _dict.push_back(e);
+        _dict.emplace_back(std::move(e));
     }
+
+    
     int line_no = 1; //行号
+    string word;
     for(auto & e : _dict)
     {
-        _index.insert({e.first,line_no++});
+        for(size_t i = 0; i < e.first.size();)
+        {
+            if(_splitTool->isEnglish(e.first)){
+                word = e.first[i];
+                ++i;
+            }else
+            {   
+                word = e.first.substr(0,3);
+                i+=3;
+            }
+            if(e.first.find(word) != string::npos)
+            {
+                _index[word].insert(line_no);
+            }
+        }
+        ++line_no;
     }
 }
 
@@ -93,12 +133,17 @@ void DirtProducer::storeDict(const string & filePath)
     }
     for(auto & elem : _dict)
     {
-       ofs_dict << elem.first << " " << elem.second << endl;
+       ofs_dict << elem.first << " " << elem.second << "\n";
     }
     
     for(auto & elem : _index)
     {
-        ofs_dictIndex << elem.first << " " << elem.second << endl;
+        ofs_dictIndex << elem.first << " ";
+        for(auto & pa : elem.second)
+        {
+            ofs_dictIndex << pa  << " ";
+        }
+         ofs_dictIndex << "\n";
     }
     ofs_dict.close();
     ofs_dictIndex.close();
@@ -115,7 +160,7 @@ void DirtProducer::showDirt()
     cout << "-----------------------Index-----------------------" << endl;
     for(auto & elem : _index)
     {
-        cout << "word:" << elem.first << " line:" << elem.second << endl;
+        cout << "word:" << elem.first << " index:" << elem.second << endl;
     }
 }
 
@@ -142,9 +187,13 @@ void DirtProducer::storeDict()//如果不指明地址，就默认用配置文件
 
     for(auto & elem : _index)
     {
-        ofs_dictIndex << elem.first << " " << elem.second << endl;
+        ofs_dictIndex << elem.first << " ";
+        for(auto & pa: elem.second)
+        {
+            ofs_dictIndex << pa  << " ";
+        }
+        ofs_dictIndex << "\n";
     }
     ofs_dict.close();
     ofs_dictIndex.close();
 }
-

@@ -28,7 +28,9 @@ int main(int argc, char* argv[]){
     while(1){
         int id = 0;
         string sentence;
-        cin >> id >> sentence;
+        cin >> id;
+        getline(cin, sentence);
+        cout << sentence << endl;
 
         //单词联想是1，网页查询是2
         if(id != 2 && id != 1)
@@ -48,8 +50,11 @@ int main(int argc, char* argv[]){
         to_json(j, msg);
         string sendMsg = j.dump();
 
-        //向服务端发送指令
-        int ret = send(clientfd, sendMsg.c_str(), sendMsg.size(), 0);
+        //向服务端发送指令，用小火车
+        size_t msgLen = sendMsg.size();
+        send(clientfd, &msgLen, sizeof(size_t), 0);
+
+        int ret = send(clientfd, sendMsg.c_str(), msgLen, 0);
         if(ret == 0)
         {
             puts("connect is broken!");
@@ -57,21 +62,25 @@ int main(int argc, char* argv[]){
         }
         ERROR_CHECK(ret, -1, "send");
 
-        //收信息
-        char buff[1024] = {0};
-        ret = recv(clientfd, buff, sizeof(buff), 0);
+        //收信息，用小火车
+        recv(clientfd, &msgLen, sizeof(size_t), 0);
+
+        char buff[2048] = {0};
+        ret = recv(clientfd, buff, msgLen, 0);
         if(ret == 0)
         {
             puts("connect is broken!");
             exit(1);
         }
         ERROR_CHECK(ret, -1, "send");
+
+        cout << buff << endl;
         
-        from_json(buff, msg);
-        for(auto &w: msg._msg)
-        {
-            cout << w << endl;
-        }
+        /* from_json(buff, msg); */
+        /* for(auto &w: msg._msg) */
+        /* { */
+        /*     cout << w << endl; */
+        /* } */
 
       }
 

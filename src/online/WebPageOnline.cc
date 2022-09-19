@@ -74,6 +74,11 @@ string & WebPageOnlie::getSummery(const vector<string> &queryWords)
         for(auto &word : queryWords) {
             if(line.find(word) != string::npos && summaryCount.size() < 3) {
                 summaryCount.push_back(line);
+                /* if(line.size() <= 256) */
+                /*     summaryCount.push_back(line); */
+                /* else */
+                /*     /1* printf("%s\n",line.substr(0, 256).c_str()); *1/ */
+                /*     summaryCount.push_back(line.substr(0, 256)); */
             }
         }
     }

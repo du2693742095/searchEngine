@@ -24,16 +24,24 @@ TcpConnection::~TcpConnection()
 //无所谓左值还是右值
 void TcpConnection::sendmsg(const std::string & msg)
 {
-    printf("TcpConnection发送消息\n");
+    //小火车发送
+    size_t msgLen = msg.size();
+    _sockIO.writen((char *)&msgLen, sizeof(msgLen));
 
-    _sockIO.writen(msg.c_str(), msg.size());
+    _sockIO.writen(msg.c_str(), msgLen);
 }
 
 std::string TcpConnection::recvmsg()
 {
-    char temp[65535] = {0};
-    //直接全部读完
-    _sockIO.readLine(temp, sizeof(temp));
+    //用小火车接收数据
+    size_t msgLen = 0;
+    _sockIO.readn((char *)&msgLen, sizeof(size_t));
+
+    char temp[2048] = {0};
+
+    /* printf("开始读数据\n"); */
+    _sockIO.readn(temp, msgLen);
+    /* printf("数据读完了\n"); */
 
     return std::string(std::move(temp));
 }

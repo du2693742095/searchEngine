@@ -25,15 +25,24 @@ void KeyRecommander::execute(Dictionary * dict){
             string str = _queryWord.substr(i,3);
             _idxSet.insert(str);
             i += 3;
+
         }
         //啥也不是
         else{
             ++i;
         }
     }
-    
+
+    /* cout<< "after cut:"<<endl; */
+    /* for(auto & elem : _idxSet){ */
+    /*     cout<< elem << endl; */
+
+    /* } */ 
+
     //查索引库，得到行号集合
     set<int> rowSet = queryIndexTable(dict);
+
+
 
     //传候选词到优先级队列
     vector<pair<string,int>>& wordDict = dict->getDict();
@@ -44,6 +53,11 @@ void KeyRecommander::execute(Dictionary * dict){
         _resultQue.push(candidate);
     }
 
+    /* cout<< "_resultQue:"<<endl; */
+    /* while(!_resultQue.empty()){ */
+    /*     cout<< _resultQue.top()._word<<endl; */
+    /*     _resultQue.pop(); */
+    /* } */
 }
 
 //查询索引
@@ -72,6 +86,7 @@ string KeyRecommander::response(){
     }
     json j;
     to_json(j, msg);
+
     return j.dump();
 }
 

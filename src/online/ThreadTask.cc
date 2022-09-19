@@ -17,12 +17,12 @@ ThreadTask::ThreadTask(const std::string &msg, const TcpConnectionPtr &conn,
         , _redis(redis)
         , _webQuery(w)
         , _dict(dict)
-{
-    cerr << "创建好任务了，准备发送" << "\n";
-}
+{}
 
 void ThreadTask::process()
 {
+    /* cerr << "线程池执行任务" << "\n"; */
+    
     //解析发过来的JSON数据包
     Msg command;
     from_json(_msg, command);
@@ -37,6 +37,7 @@ void ThreadTask::process()
     {
         case 1:{
             KeywordsSearcher searcher(queryWords, _conn, _dict, _redis);
+            searcher.doQuery();
             break;
         }
 

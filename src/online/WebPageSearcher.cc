@@ -21,10 +21,13 @@ void WebPageSearcher::doQuery()
     //现在redis里面查，如果查到了，就让result为redis的值
     //如果没有，那就在数据库里面去查
     if(result.size() == 0){
+        cout << "在网页库里面查询" << endl;
         result = _query.doQuery(_sought);
         _hiredis->set(_sought + "_2", result);
     }
     
+    cout << result << endl;
+
     //发送
     _conn->sendToEpollLoop(result);
 }

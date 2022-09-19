@@ -66,7 +66,7 @@ int SocketIO::readLine(char *info, int len)
         }
     }
     *pChar = '\0';
-    return total - left;
+    return len - left;
 }
 
 int SocketIO::writen(const char *info, int len)
